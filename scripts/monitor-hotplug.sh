@@ -151,10 +151,10 @@ while true; do
   if ! swaymsg -m -t subscribe '["output", "input"]' 2>/dev/null | while read -r event; do
     # Log the event for debugging
     # log "Sway event: $(echo "$event" | jq -c .change 2>/dev/null || echo "switch")"
-    if echo "$event" | grep -qE "change|switch"; then
-      sleep 0.5
-      update_monitors || true
-    fi
+    
+    # Process all output/input events (removed strict grep filter to catch disconnects)
+    sleep 0.5
+    update_monitors || true
   done; then
     log "Warning: swaymsg subscription lost. Restarting in 2s..."
     sleep 2
