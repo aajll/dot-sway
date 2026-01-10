@@ -135,6 +135,15 @@ if [[ "${1:-}" == "--once" ]]; then
   exit 0
 fi
 
+# Singleton: Kill other instances
+current_pid=$$
+for pid in $(pgrep -f "monitor-hotplug.sh"); do
+    if [[ "$pid" != "$current_pid" ]]; then
+        echo "Killing old instance: $pid" >> "$LOG_FILE"
+        kill "$pid" 2>/dev/null || true
+    fi
+done
+
 log "Monitor hotplug daemon started (PID: $$)"
 update_monitors || true
 
