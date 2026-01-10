@@ -58,6 +58,17 @@ cp ~/.config/sway/config ~/.config/sway/config.backup
 cp ~/.config/sway/config ~/.config/sway/config
 ```
 
+### Clamshell Mode Setup (Important)
+To use "clamshell mode" (using the laptop while the lid is closed with an external monitor), you must prevent `systemd-logind` from suspending the system when the lid is closed. The `monitor-hotplug.sh` script handles suspension logic itself.
+
+Run the following to configure `logind`:
+
+```bash
+sudo mkdir -p /etc/systemd/logind.conf.d/
+echo -e "[Login]\nHandleLidSwitch=ignore\nHandleLidSwitchExternalPower=ignore" | sudo tee /etc/systemd/logind.conf.d/sway-clamshell.conf
+sudo systemctl restart systemd-logind
+```
+
 ### Status Bar
 Add a bar block to your sway config to execute the script. For vanilla swaybar:
 
@@ -101,6 +112,7 @@ See [`extra/EXTRA.md`](extra/EXTRA.md) for details.
 - Missing icons: install a font that supports Nerd Fonts/Unicode glyphs (e.g. JetBrainsMono Nerd Font)
 - Slow updates: ensure scripts in `status.d` are quick; avoid running heavy commands each second
 - Bluetooth icon missing: ensure `bluez` is installed and `bluetoothctl` is working
+- Clamshell mode not working: Check `/tmp/sway-monitor-hotplug.log` for errors and verify `HandleLidSwitch=ignore` is set in `logind.conf`.
 
 ## License
 

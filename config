@@ -248,5 +248,9 @@ bar {
 # --- Auto-start ---
 # Daemon to handle monitor hotplugging (replaces kanshi)
 exec ~/.config/sway/scripts/monitor-hotplug.sh
+
+# Lid switch triggers
+bindswitch --locked lid:on exec ~/.config/sway/scripts/monitor-hotplug.sh --once
+bindswitch --locked lid:off exec ~/.config/sway/scripts/monitor-hotplug.sh --once
 #
 include /etc/sway/config.d/*
