@@ -14,7 +14,8 @@ $HOME/.local/bin/
         - If an external monitor is connected:
             - Enables the external monitor.
             - Moves all workspaces to it.
-            - If the laptop lid is closed, disables the internal display (`eDP-1`).
+            - Disables the internal display (`eDP-1`) by default (configurable via `DISABLE_INTERNAL_ON_EXTERNAL="true"` in the script).
+            - If `DISABLE_INTERNAL_ON_EXTERNAL` is set to "false" and the lid is open, enables the internal display in extended mode.
         - If no external monitor is connected:
             - Enables the internal display.
             - Moves all workspaces to it.
