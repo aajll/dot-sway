@@ -23,7 +23,6 @@ set $menu wofi --show drun -G
 exec dbus-update-activation-environment --systemd DISPLAY WAYLAND_DISPLAY XDG_CURRENT_DESKTOP
 exec systemctl --user import-environment DISPLAY WAYLAND_DISPLAY XDG_CURRENT_DESKTOP
 
-
 ### Output configuration
 #
 # Default wallpaper (more resolutions are available in /usr/share/backgrounds/sway/)
@@ -49,6 +48,7 @@ input type:keyboard {
        xkb_model "pc105"
 }
 
+# Enable blur effects (works well with SwayFX)
 blur enable
 
 #gaps and borders
