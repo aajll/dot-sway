@@ -92,9 +92,6 @@ window#waybar {
 #battery.charging,
 #battery.plugged  { color: @success; }
 
-/* --- Pulseaudio mute ----------------------------------------------------- */
-#pulseaudio.muted { color: @muted; }
-
 /* --- Network disconnected ------------------------------------------------ */
 #network.disconnected { color: @muted; }
 
