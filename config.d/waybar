@@ -1,0 +1,11 @@
+# Launch Waybar as the desktop status bar.
+#
+# The shell command bootstraps `waybar/colors.css` from the current
+# theme state on every reload, so a fresh checkout works without
+# pre-running `scripts/toggle_theme.sh init`.
+exec_always sh -c '\
+  state=$(cat $HOME/.config/sway/.theme_state 2>/dev/null || echo dark); \
+  ln -sfn "colors-${state}.css" $HOME/.config/sway/waybar/colors.css; \
+  pkill -x waybar; \
+  waybar -c $HOME/.config/sway/waybar/config.jsonc -s $HOME/.config/sway/waybar/style.css & \
+'

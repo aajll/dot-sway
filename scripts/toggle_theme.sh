@@ -65,6 +65,9 @@ toggle_theme() {
     # Update mako theme (optional - only if installed)
     update_mako_theme "$new_theme"
 
+    # Update waybar theme (optional - only if config present)
+    update_waybar_theme "$new_theme"
+
     # Reload Sway to apply changes
     swaymsg reload &>/dev/null || true
 
@@ -196,6 +199,21 @@ update_mako_theme() {
     fi
 }
 
+# Update waybar theme by symlinking the active palette and signalling reload.
+# Safe no-op when the waybar dir is absent (e.g., user still on swaybar).
+update_waybar_theme() {
+    local theme="$1"
+    local waybar_dir="$HOME/.config/sway/waybar"
+    local target="colors-${theme}.css"
+
+    [[ -d "$waybar_dir" && -f "$waybar_dir/$target" ]] || return 0
+
+    ln -sfn "$target" "$waybar_dir/colors.css"
+
+    # SIGUSR2 forces waybar to reread config + style. No-op if not running.
+    pkill -SIGUSR2 -x waybar 2>/dev/null || true
+}
+
 # Initialize theme on startup
 init_theme() {
     local current=$(get_current_theme)
@@ -203,6 +221,7 @@ init_theme() {
     update_wofi_theme "$current"
     update_kitty_theme "$current"
     update_mako_theme "$current"
+    update_waybar_theme "$current"
 }
 
 # Main command dispatcher
