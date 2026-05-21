@@ -111,7 +111,7 @@ Examples:
 1. **Native module:** add its name to a `modules-*` array in `waybar/config.jsonc` and a config block below. Native modules are preferred when one fits — they're event-driven.
 2. **Custom shell module:** drop the script in `waybar/modules/`, add `"custom/<name>"` to a cluster with `"exec"`, `"interval"`, and optional `"on-click"`.
 3. `chmod +x waybar/modules/<name>.sh`.
-4. Reload: `pkill -SIGUSR2 -x waybar` (style-only) or `swaymsg reload` (when changing `config.jsonc` or anything sway sees).
+4. Reload: `pkill -SIGUSR2 -x waybar` (style or `config.jsonc` changes — waybar rereads both). `swaymsg reload` no longer relaunches waybar; if you ever need a full restart, `pkill -x waybar` and let the next sway login (or run the launch command from `config.d/waybar`) bring it back.
 
 ### Modifying Sway config
 1. Edit `config` (or a snippet under `config.d/`).
