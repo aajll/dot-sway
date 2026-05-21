@@ -11,6 +11,7 @@ A portable Sway (and Swayfx) configuration with **Waybar** as the desktop status
 - `config` — Sway configuration. Sources `/tmp/swayfx_config_snippet` (SwayFX-only settings, generated on launch by `scripts/swayfx_guard.sh`) and `/tmp/sway_theme_config` (active theme palette).
 - `config.d/` — Drop-in directory; sourced via `include config.d/*`.
     - `waybar` — Launches Waybar, bootstrapping the active palette symlink.
+    - `wallpaper` — Re-rolls the desktop wallpaper on each reload. See [Wallpaper Rotation](#wallpaper-rotation).
     - `floating_windows` — Per-application floating rules. See [Floating Windows](#floating-windows).
     - `compose_key` — Compose-key bindings.
 - `waybar/` — Status bar configuration.
@@ -23,6 +24,10 @@ A portable Sway (and Swayfx) configuration with **Waybar** as the desktop status
         - `theme.sh` — Current theme indicator (🌙 / ☀️).
         - `dnd.sh` — Mako DND indicator (🧘 when active).
 - `scripts/` — Utility scripts bound to keys in `config`. See [`scripts/SCRIPTS.md`](scripts/SCRIPTS.md).
+- `images/` — Visual assets.
+    - `wallpapers/` — Pool of source images for `rotate-wallpaper.sh`. Drop `.png/.jpg/.jpeg` files in; the folder itself is tracked via `.gitkeep`, contents are gitignored.
+    - `wp.png` — Symlink to the active wallpaper (gitignored). Managed by `scripts/rotate-wallpaper.sh`; consumed by `output * bg` and swaylock.
+    - `preview.png` — Repo screenshot for the README header.
 - `extra/` — Supplementary configs (kanshi, wofi, mako, swhkd). See [`extra/EXTRA.md`](extra/EXTRA.md).
 
 ## Requirements
@@ -107,6 +112,34 @@ Manual usage:
 ~/.config/sway/scripts/toggle_theme.sh init     # re-apply current theme to all components
 ~/.config/sway/scripts/toggle_theme.sh get      # print "dark" or "light"
 ```
+
+## Wallpaper Rotation
+
+`config.d/wallpaper` runs `scripts/rotate-wallpaper.sh` on each Sway start/reload. The script:
+
+1. Scans `images/wallpapers/` for `.png`, `.jpg`, and `.jpeg` files (case-insensitive).
+2. Picks one uniformly at random.
+3. Repoints the `images/wp.png` symlink at the pick.
+4. Applies it live with `swaymsg output * bg images/wp.png fill` so the change is visible immediately, not just after the next reload.
+
+Because everything that references the wallpaper (`output * bg`, the swaylock keybind, and the swayidle `before-sleep` hook) reads `images/wp.png`, the lock screen and idle blur follow the same rotation automatically.
+
+### Usage
+
+```bash
+# Add wallpapers
+cp ~/Pictures/*.jpg ~/.config/sway/images/wallpapers/
+
+# Roll a new one (any of the below)
+$mod+Shift+c                                    # reload Sway — fires the exec_always hook
+~/.config/sway/scripts/rotate-wallpaper.sh      # run the script directly
+```
+
+An empty `images/wallpapers/` folder is a no-op — the current `wp.png` symlink is left untouched, so you can disable rotation by emptying the folder without breaking anything.
+
+### Cold-boot note
+
+On a fresh login Sway parses `output * bg` before `exec_always` fires, so the boot wallpaper is whatever `wp.png` pointed at when you last shut down. The rotation script then runs and applies the new pick live — expect a sub-second flash of the previous wallpaper before it changes.
 
 ## Media Keys
 
@@ -208,6 +241,7 @@ The file ships with commented examples (pavucontrol, file pickers, etc.).
 | Bluetooth icon stuck off                        | `bluez` running? `rfkill list bluetooth` shows the controller?                              |
 | Clamshell mode suspends unexpectedly            | `/tmp/sway-monitor-hotplug.log` + verify `HandleLidSwitch=ignore` in `/etc/systemd/logind.conf.d/` |
 | Monitor profile not applied                     | `/tmp/sway-monitor-hotplug.log` logs the detected identity and which source set each value  |
+| Wallpaper doesn't rotate on reload              | `images/wallpapers/` exists with at least one `.png/.jpg/.jpeg`? Run `scripts/rotate-wallpaper.sh` directly and check `readlink images/wp.png` |
 
 ## License
 

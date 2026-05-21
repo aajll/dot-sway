@@ -41,7 +41,8 @@ bindsym $super+l exec swaylock -f -i ~/.config/sway/images/wp.png
 # It auto-detects the connected output name (e.g. DP-2, HDMI-A-1) and applies
 # mode, scale, and adaptive_sync at runtime.
 
-# Default wallpaper (more resolutions are available in /usr/share/backgrounds/sway/)
+# Wallpaper — wp.png is a symlink managed by config.d/wallpaper + scripts/rotate-wallpaper.sh.
+# Drop images into images/wallpapers/ to populate the rotation pool.
 output * bg ~/.config/sway/images/wp.png fill
 # Example configuration:
 #
@@ -62,7 +63,7 @@ exec swayidle -w \
          before-sleep 'swaylock -f -i ~/.config/sway/images/wp.png'
 
 ### Input configuration
-set $compose_key compose:menu
+set $compose_key compose:rctrl
 input type:keyboard {
        xkb_layout "gb"
        xkb_model "pc105"

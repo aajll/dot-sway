@@ -56,6 +56,10 @@ $HOME/.local/bin/
         | `DOTSWAY_INTERNAL_OUTPUT` | *(auto)* | Force a specific internal output name (e.g. `eDP-1`) |
         | `DOTSWAY_MONITOR_PROFILES_FILE` | `~/.config/sway/scripts/monitor-profiles.local.sh` | Alternate path for local per-monitor overrides |
 
+- `rotate-wallpaper.sh`: Picks a random `.png/.jpg/.jpeg` from `~/.config/sway/images/wallpapers/`, repoints the `images/wp.png` symlink at it, and applies the change live via `swaymsg output * bg`. Wired through `config.d/wallpaper` so each `swaymsg reload` re-rolls.
+    - **No-op** when `images/wallpapers/` is empty or absent — leaves the current `wp.png` symlink alone, so the wallpaper subsystem degrades cleanly when the pool is unset.
+    - **Lock screen / idle blur:** both consume `images/wp.png`, so they follow rotation automatically — no extra wiring.
+    - **Override the source dir:** set `SWAY_DIR=/some/other/path` before invoking; the script resolves `images/wallpapers/` and `images/wp.png` underneath it.
 - `toggle_theme.sh`: Switches the desktop between dark and light themes in one keypress (`Mod+Shift+t`). Source of truth is Gnome's `org.gnome.desktop.interface color-scheme` when `gsettings` is available, otherwise `~/.config/sway/.theme_state`.
     - **Updates in lockstep:**
         - Sway colors via `/tmp/sway_theme_config` (sourced from `config`)
