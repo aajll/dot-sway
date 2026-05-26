@@ -60,10 +60,11 @@ output * bg ~/.config/sway/images/wp.png fill
 #          before-sleep 'swaylock -f -c 000000'
 exec swayidle -w \
          timeout 300 'swaylock -f -i ~/.config/sway/images/wp.png' \
+         timeout 600 'swaymsg "output * power off"' resume 'swaymsg "output * power on"' \
          before-sleep 'swaylock -f -i ~/.config/sway/images/wp.png'
 
 ### Input configuration
-set $compose_key compose:rctrl
+set $compose_key compose:menu
 input type:keyboard {
        xkb_layout "gb"
        xkb_model "pc105"
