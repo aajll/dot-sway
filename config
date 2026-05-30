@@ -63,6 +63,11 @@ exec swayidle -w \
          timeout 600 'swaymsg "output * power off"' resume 'swaymsg "output * power on"' \
          before-sleep 'swaylock -f -i ~/.config/sway/images/wp.png'
 
+# Hold an idle inhibitor while any PipeWire stream is active, so swayidle
+# doesn't lock the screen during video playback (e.g. Twitch, where the site
+# doesn't request the Wake Lock API itself).
+exec wayland-pipewire-idle-inhibit
+
 ### Input configuration
 set $compose_key compose:menu
 input type:keyboard {

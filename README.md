@@ -68,6 +68,7 @@ Other:
 
 - `grim`, `slurp` — screenshots
 - `swayidle`, `swaylock` — idle locking
+- `wayland-pipewire-idle-inhibit` — holds an idle inhibitor while audio is playing so videos don't trigger the lock. Install with `cargo install wayland-pipewire-idle-inhibit` (needs `libpipewire-0.3-dev` and `libclang-dev` at build time); the binary must be on the sway session's `PATH`.
 - `dbus-update-activation-environment`, `systemctl --user import-environment` — XDG/Wayland env propagation
 
 ## Status Bar
