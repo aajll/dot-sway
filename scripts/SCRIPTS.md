@@ -63,7 +63,7 @@ $HOME/.local/bin/
 - `toggle_theme.sh`: Switches the desktop between dark and light themes in one keypress (`Mod+Shift+t`). Source of truth is Gnome's `org.gnome.desktop.interface color-scheme` when `gsettings` is available, otherwise `~/.config/sway/.theme_state`.
     - **Updates in lockstep:**
         - Sway colors via `/tmp/sway_theme_config` (sourced from `config`)
-        - Waybar palette by symlinking `waybar/colors.css` → `colors-{dark,light}.css` and sending `SIGUSR2` for a live reload
+        - Waybar palette by symlinking `waybar/colors.css` → `colors-{dark,light}.css`; `toggle` additionally sends `SIGUSR2` for a live reload (`init` deliberately doesn't — signalling waybar mid-startup races its async D-Bus setup and segfaults it)
         - Kitty theme (Tokyo Night Moon/Day) via `kitty @ set-colors`
         - Wofi theme by symlinking `~/.config/wofi/style.css`
         - Mako notification theme (when installed) with `makoctl reload`

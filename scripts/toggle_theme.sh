@@ -68,6 +68,11 @@ toggle_theme() {
     # Update waybar theme (optional - only if config present)
     update_waybar_theme "$new_theme"
 
+    # SIGUSR2 forces waybar to reread config + style. Only safe here, on an
+    # established session: signalling during `init` raced waybar's own startup
+    # (async D-Bus proxy setup) and segfaulted it in libgiomm. No-op if not running.
+    pkill -SIGUSR2 -x waybar 2>/dev/null || true
+
     # Reload Sway to apply changes
     swaymsg reload &>/dev/null || true
 
@@ -199,7 +204,9 @@ update_mako_theme() {
     fi
 }
 
-# Update waybar theme by symlinking the active palette and signalling reload.
+# Update waybar theme by symlinking the active palette. The live reload signal
+# is sent by toggle_theme() only — at init time waybar reads the symlink itself
+# on startup, and signalling it mid-startup crashes it (see toggle_theme).
 # Safe no-op when the waybar dir is absent (e.g., user still on swaybar).
 update_waybar_theme() {
     local theme="$1"
@@ -209,9 +216,6 @@ update_waybar_theme() {
     [[ -d "$waybar_dir" && -f "$waybar_dir/$target" ]] || return 0
 
     ln -sfn "$target" "$waybar_dir/colors.css"
-
-    # SIGUSR2 forces waybar to reread config + style. No-op if not running.
-    pkill -SIGUSR2 -x waybar 2>/dev/null || true
 }
 
 # Initialize theme on startup
