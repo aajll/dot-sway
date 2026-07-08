@@ -1,5 +1,13 @@
 # Requirements
 
+Dependencies follow a **probe-and-degrade** contract. This file *names* what each feature needs; it never hardcodes or force-installs. For any dependency you have three choices:
+
+1. **Install it yourself** — everything is probed at runtime (`command -v`, `upower -e`, …), so the feature lights up automatically once the tool is present.
+2. **Run the helper** — `scripts/setup-defaults.sh` configures the session/XDG defaults it can (terminal, MIME, portals) and *prints* the exact root commands for the packages it can't install for you. See [xdg-defaults.md](xdg-defaults.md).
+3. **Skip it** — the feature degrades silently: missing hardware or tools produce no output and no errors (Waybar hides empty modules; scripts `exit 0`).
+
+Only **Core** below is load-bearing; everything after it is opt-in.
+
 ## Core
 
 - `sway` (or `swayfx`), `swaymsg`, `swaynag`

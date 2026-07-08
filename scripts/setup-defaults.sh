@@ -109,9 +109,13 @@ print_root_steps() {
   # Debian 'x-terminal-emulator' alternative -> $TERMINAL_CMD:
   sudo update-alternatives --set x-terminal-emulator /usr/bin/$TERMINAL_CMD
 
-  # Nautilus "Open in Terminal" (the stock extension is hardwired to gnome-terminal):
+  # Nautilus "Open in Terminal" (the stock extension is hardwired to gnome-terminal).
+  # It's a Python extension loaded by the SYSTEM python3, so install --user -- NOT
+  # pipx/uv tool, whose isolated venvs Nautilus can't import from.
   sudo apt remove nautilus-extension-gnome-terminal
-  pipx install nautilus-open-any-terminal   # or: pip install --user nautilus-open-any-terminal
+  sudo apt install python3-nautilus gir1.2-gtk-4.0 python3-pip
+  pip install --user --break-system-packages nautilus-open-any-terminal
+  glib-compile-schemas ~/.local/share/glib-2.0/schemas/
   gsettings set com.github.stunkymonkey.nautilus-open-any-terminal terminal $TERMINAL_CMD
   nautilus -q
 
