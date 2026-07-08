@@ -1,0 +1,66 @@
+name: CI
+
+# Lint the shell scripts and syntax-check the Sway config on every push and PR.
+# Two jobs: `lint` is the load-bearing one (pure static analysis, always runs
+# clean anywhere); `config-check` is best-effort (installs upstream sway from
+# apt, which is vanilla — not SwayFX — and may lag the version you run).
+
+on:
+  push:
+    branches: [master]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  lint:
+    name: shellcheck + bash -n
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install shellcheck
+        run: sudo apt-get update && sudo apt-get install -y shellcheck
+
+      - name: bash -n (syntax) on every tracked script
+        run: |
+          fail=0
+          while IFS= read -r f; do
+            bash -n "$f" || { echo "::error file=$f::bash -n failed"; fail=1; }
+          done < <(git ls-files '*.sh')
+          exit $fail
+
+      - name: shellcheck (gate at warning)
+        run: |
+          # Gitignored *.local.sh are absent in a fresh checkout, so `git ls-files`
+          # naturally excludes them. Gated at warning: the tree is clean at this
+          # level (see the design note in AGENTS.md). Drop to --severity=error to
+          # loosen, or add a .shellcheckrc to tune specific codes.
+          shellcheck --severity=warning $(git ls-files '*.sh')
+
+  config-check:
+    name: sway -C
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install sway
+        run: sudo apt-get update && sudo apt-get install -y sway
+
+      - name: Syntax-check the config
+        run: |
+          # The config hardcodes ~/.config/sway paths, so expose the checkout there.
+          mkdir -p "$HOME/.config"
+          ln -sfn "$GITHUB_WORKSPACE" "$HOME/.config/sway"
+          # `sway -C` prints parse errors but still exits 0 (observed), so the exit
+          # code is not a reliable gate — fail the job iff it emits an [ERROR] line.
+          # The $XDG_RUNTIME_DIR includes and .local overrides are absent here; sway
+          # silently skips missing includes, which is exactly the runtime contract.
+          out="$(sway -C 2>&1)" || true
+          echo "$out"
+          if echo "$out" | grep -q '\[ERROR\]'; then
+            echo "::error::sway -C reported config errors"
+            exit 1
+          fi
