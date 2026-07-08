@@ -4,14 +4,21 @@
 # background. Repoints the images/wp.png symlink (used by `output * bg` and
 # swaylock) and applies the change live via swaymsg.
 #
-# Empty folder → no-op. Run from sway via `exec_always` so every reload picks
-# fresh.
+# Empty folder → no-op. Rotation is on-demand — bound to $mod+Shift+w. With
+# --if-unset the script only picks when wp.png isn't already a valid wallpaper,
+# so start/reload (config.d/wallpaper) bootstrap one on first run but leave an
+# existing wallpaper in place.
 set -euo pipefail
+
+# --if-unset: no-op when wp.png already resolves to an existing file. Used by
+# config.d/wallpaper so start/reload only set a wallpaper when none is present,
+# letting the chosen wallpaper persist until an explicit rotate.
+IF_UNSET=0
+[[ "${1:-}" == "--if-unset" ]] && IF_UNSET=1
 
 SWAY_DIR="${SWAY_DIR:-$HOME/.config/sway}"
 WALLPAPER_DIR="$SWAY_DIR/images/wallpapers"
 LINK="$SWAY_DIR/images/wp.png"
-SKIP_MARKER="/tmp/sway_skip_wallpaper_rotation"
 
 # Machine-local pool override — wallpaper_dir.local (gitignored, like
 # compose_key.local) holds one path to an external wallpaper folder.
@@ -23,12 +30,10 @@ if [[ -f "$OVERRIDE_FILE" ]]; then
   [[ -n "$override" ]] && WALLPAPER_DIR="${override/#\~/$HOME}"
 fi
 
-# Theme toggles reload sway to re-apply colors, which would otherwise rotate the
-# wallpaper too. toggle_theme.sh drops this marker so we skip rotation on that
-# reload; sway still re-applies the current wp.png via `output * bg`. The marker
-# is consumed here so the next genuine reload rotates as normal.
-if [[ -e "$SKIP_MARKER" ]]; then
-  rm -f "$SKIP_MARKER"
+# In --if-unset (start/reload) mode, leave an already-set wallpaper alone so it
+# persists until the user explicitly rotates with $mod+Shift+w. `-e` follows the
+# symlink, so a missing or dangling wp.png still triggers a first pick.
+if [[ "$IF_UNSET" -eq 1 && -e "$LINK" ]]; then
   exit 0
 fi
 
