@@ -13,6 +13,16 @@ WALLPAPER_DIR="$SWAY_DIR/images/wallpapers"
 LINK="$SWAY_DIR/images/wp.png"
 SKIP_MARKER="/tmp/sway_skip_wallpaper_rotation"
 
+# Machine-local pool override — wallpaper_dir.local (gitignored, like
+# compose_key.local) holds one path to an external wallpaper folder.
+# Absent file → the in-repo images/wallpapers/ pool above.
+# First non-blank, non-comment line is the path (~ is expanded).
+OVERRIDE_FILE="$SWAY_DIR/wallpaper_dir.local"
+if [[ -f "$OVERRIDE_FILE" ]]; then
+  override="$(grep -m1 -v -e '^[[:space:]]*#' -e '^[[:space:]]*$' "$OVERRIDE_FILE" || true)"
+  [[ -n "$override" ]] && WALLPAPER_DIR="${override/#\~/$HOME}"
+fi
+
 # Theme toggles reload sway to re-apply colors, which would otherwise rotate the
 # wallpaper too. toggle_theme.sh drops this marker so we skip rotation on that
 # reload; sway still re-applies the current wp.png via `output * bg`. The marker
@@ -33,8 +43,13 @@ mapfile -d '' -t candidates < <(
 
 pick="${candidates[RANDOM % ${#candidates[@]}]}"
 
-# Relative symlink target keeps the link portable across machines.
-ln -sfn "wallpapers/$(basename "$pick")" "$LINK"
+# In-repo pool → relative target (portable across machines); external
+# override dir → absolute path is the only option.
+if [[ "$pick" == "$SWAY_DIR/images/wallpapers/"* ]]; then
+  ln -sfn "wallpapers/$(basename "$pick")" "$LINK"
+else
+  ln -sfn "$pick" "$LINK"
+fi
 
 # Apply live if sway IPC is reachable. On cold boot the socket may not exist
 # yet — sway will pick up the symlink when it processes `output * bg` itself.
